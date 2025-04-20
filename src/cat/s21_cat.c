@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int i = optind; i < argc; i++) {
-        s21_cat(argv[i]);
+        s21_cat(argv[i], opts);
     }
     
 
@@ -30,16 +30,54 @@ void print_info(char *program_name) {
     printf("Usage: %s [OPTION] [FILE]\n", program_name);
 }
 
-void s21_cat(char *filename) {
+void s21_cat(char *filename, options_t opts) {
     FILE *file = fopen(filename, "r");
     if (file == NULL) {
         printf("Can't open file %s\n", filename);
         return;
     }
 
-    int c;
-    while ((c = fgetc(file)) != EOF) {
-        printf("%c", c);
+    bool prev_line_blank = false;
+    int line_number = 1;
+    int prev_ch = '\n';
+    int ch;
+    while ((ch = fgetc(file)) != EOF) {
+
+        // -s flag
+        if (opts.squeeze_blank && ch == '\n' && prev_line_blank) {
+            continue;
+        }
+    
+        // -n opt
+        if (opts.number_lines && prev_ch == '\n') {
+            printf("%6d  ", line_number);
+            line_number += 1;
+        }
+        // -b opt
+        else if (opts.number_nonblank && prev_ch == '\n' && ch != '\n') {
+            printf("%6d  ", line_number);
+            line_number += 1;
+        }
+
+        else {
+            // -e and -t opts
+            if (opts.show_ends && ch == '\n') {
+                printf("$\n");
+            } else if (opts.show_tabs && ch == '\t') {
+                printf("^I");
+            } else {
+                // Base case
+                printf("%c", ch);
+            }
+
+        }
+
+        if (prev_ch == '\n' && ch == '\n') {
+            prev_line_blank = true;
+        } else {
+            prev_line_blank = false;
+        }
+        prev_ch = ch;
     }
 }
 

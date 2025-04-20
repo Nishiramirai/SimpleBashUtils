@@ -1,3 +1,5 @@
+
+
 #include <getopt.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -19,6 +21,6 @@ typedef struct {
 
 
 options_t get_options(int argc, char *argv[]);
-void s21_cat(char *filename);
+void s21_cat(char *filename, options_t opts);
 
 void print_info(char *program_name);
