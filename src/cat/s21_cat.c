@@ -79,6 +79,8 @@ void s21_cat(char *filename, options_t opts) {
         }
         prev_ch = ch;
     }
+
+    fclose(file);
 }
 
 options_t get_options(int argc, char *argv[]) {
