@@ -1,6 +1,6 @@
 TARGET = s21_grep
 CC = gcc
-FLAGS = -Wall -Werror -Wextra -std=c11
+FLAGS = -Wall -Wextra -std=c11
 
 all: $(TARGET)
 

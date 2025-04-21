@@ -6,9 +6,16 @@ int main(int argc, char *argv[]) {
         return FUNC_ERROR_CODE;
     }
 
-    char *pattern = argv[1];
+    options_t opts = get_options(argc, argv);
 
-    for (int i = 2; i < argc; i++) {
+    if (optind >= argc - 1) {
+        printf("Not enough arguments\n");
+        return FUNC_ERROR_CODE;
+    }
+
+    
+    char *pattern = argv[optind];
+    for (int i = optind + 1; i < argc; i++) {
         s21_grep(argv[i], pattern);
     }
 
@@ -35,4 +42,52 @@ void s21_grep(char *filename, char *pattern) {
 
     fclose(file);
     free(line);
+}
+
+
+options_t get_options(int argc, char *argv[]) {
+
+    const char *opts_list = "e:ivcln";
+
+    options_t opts = {0};
+
+    int opt;
+    while ((opt = getopt(argc, argv, opts_list)) != -1) {
+        switch (opt)
+        {
+        case 'e':
+            opts.pattern = true;
+            // TODO: Store pattern
+            break;
+
+        case 'i':
+            opts.ignore_case = true;
+            break;
+
+        case 'v':
+            opts.invert_match = true;
+            break;
+
+        case 'c':
+            opts.linecount_only = true;
+            break;
+
+        case 'l':
+            opts.filenames_only = true;
+            break;
+
+        case 'n':
+            opts.number_lines = true;
+            break;
+
+        case '?':
+            break;
+        
+        default:
+            break;
+        }
+    }
+
+
+    return opts;
 }
