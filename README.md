@@ -1,3 +1,3 @@
 # SimpleBashUtils
 
- Basic Bash utilities for working with C language text
+implementation of grep and cat unix utilities in C languge
