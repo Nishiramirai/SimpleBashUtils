@@ -8,10 +8,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (optind >= argc) {
-        cat("stdin");
+        cat("stdin", opts);
     } else {
         for (int i = optind; i < argc; i++) {
-            cat(argv[optind]);
+            cat(argv[optind], opts);
         }
     }
     
@@ -77,7 +77,7 @@ options_t get_options(int argc, char *argv[]) {
     return opts;
 }
 
-void cat(char *filename) {
+void cat(char *filename, options_t opts) {
     FILE *stream = NULL;
 
     if (strcmp(filename, "stdin") == 0) {
@@ -90,10 +90,69 @@ void cat(char *filename) {
         }
     }
 
-    int ch;
-    while ((ch = fgetc(stream)) != EOF) {
-        putchar(ch);
+    int previous_char = '\n';
+    int current_char;
+    int lines_count = 1;
+    int empty_lines = 0;
+    int skip_flag = 0;
+  
+    while ((current_char = fgetc(stream)) != EOF) {
+      // s flag
+      if (opts.squeeze_blank && current_char == '\n' && previous_char == '\n') {
+        empty_lines += 1;
+        if (empty_lines > 1) {
+          skip_flag = 1;
+        }
+      } else if (current_char != '\n') {
+        empty_lines = 0;
+        skip_flag = 0;
+      }
+      if (!skip_flag) {
+        // b flag
+        if (opts.number_nonblank && (current_char != '\n') &&
+            (previous_char == '\n')) {
+          printf("%6d\t", lines_count++);
+        }
+        // n flag
+        if (opts.number_lines && previous_char == '\n') {
+          printf("%6d\t", lines_count++);
+        }
+        // e flag
+        if (opts.show_ends && current_char == '\n') {
+          putchar('$');
+        }
+        // t flag
+        if (opts.show_tabs && current_char == '\t') {
+          putchar('^');
+          current_char = 'I';
+        }
+  
+        // v flag or without flags
+        if (opts.show_nonprinting && current_char != '\n' &&
+            current_char != '\t') {
+          unsigned char uc = current_char;
+          if (uc < 32) {
+            printf("^%c", uc + 64);
+          } else if (uc == 127) {
+            printf("^%c", '?');
+          } else if (uc >= 128 && uc < 160) {
+            printf("M-^%c", uc - 64);
+          } else if (uc >= 160 && uc < 255) {
+            printf("M-%c", uc - 128);
+          } else if (uc == 255) {
+            printf("M-^?");
+          } else {
+            printf("%c", uc);
+          }
+        } else {
+          putchar(current_char);
+        }
+      }
+      previous_char = current_char;
     }
+  
 
-    fclose(stream);
+    if (stream != stdin) {
+        fclose(stream);
+    }
 }

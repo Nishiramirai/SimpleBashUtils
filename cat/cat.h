@@ -25,8 +25,7 @@ typedef struct {
 
 
 options_t get_options(int argc, char *argv[]);
-
-void cat();
+void cat(char *filename, options_t opts);
 
 
 #endif
